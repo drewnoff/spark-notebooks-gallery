@@ -1,0 +1,382 @@
+{
+  "metadata" : {
+    "id" : "eecf5193-2312-49a1-ab3b-a97b1fdee383",
+    "name" : "earthquake_data",
+    "user_save_timestamp" : "1970-01-01T03:00:00.000Z",
+    "auto_save_timestamp" : "1970-01-01T03:00:00.000Z",
+    "language_info" : {
+      "name" : "scala",
+      "file_extension" : "scala",
+      "codemirror_mode" : "text/x-scala"
+    },
+    "trusted" : true,
+    "sparkNotebook" : null,
+    "customLocalRepo" : null,
+    "customRepos" : null,
+    "customDeps" : null,
+    "customImports" : null,
+    "customArgs" : null,
+    "customSparkConf" : {
+      "spark.app.name" : "EarthquakeDataNotebook",
+      "spark.master" : "local[*]",
+      "spark.executor.memory" : "3G"
+    },
+    "customVars" : null
+  },
+  "cells" : [ {
+    "metadata" : {
+      "trusted" : true,
+      "input_collapsed" : false,
+      "collapsed" : false,
+      "id" : "4128679FD40B431C81A91B3BBF493D78"
+    },
+    "cell_type" : "code",
+    "source" : "val spark = sparkSession\n\n// This import is needed to use the $-notation\nimport spark.implicits._",
+    "outputs" : [ {
+      "name" : "stdout",
+      "output_type" : "stream",
+      "text" : "spark: org.apache.spark.sql.SparkSession = org.apache.spark.sql.SparkSession@580786f3\nimport spark.implicits._\n"
+    }, {
+      "metadata" : { },
+      "data" : {
+        "text/html" : ""
+      },
+      "output_type" : "execute_result",
+      "execution_count" : 1,
+      "time" : "Took: 2.721s, at 2017-06-6 10:50"
+    } ]
+  }, {
+    "metadata" : {
+      "trusted" : true,
+      "input_collapsed" : false,
+      "collapsed" : false,
+      "id" : "D96944FBB03043E58C9A9E455EAD91C3"
+    },
+    "cell_type" : "code",
+    "source" : "import org.apache.spark.sql.functions._",
+    "outputs" : [ {
+      "name" : "stdout",
+      "output_type" : "stream",
+      "text" : "import org.apache.spark.sql.functions._\n"
+    }, {
+      "metadata" : { },
+      "data" : {
+        "text/html" : ""
+      },
+      "output_type" : "execute_result",
+      "execution_count" : 2,
+      "time" : "Took: 1.205s, at 2017-06-6 10:50"
+    } ]
+  }, {
+    "metadata" : {
+      "id" : "FE2917A0BAFF43BCAF5A630B4C2FFEA1"
+    },
+    "cell_type" : "markdown",
+    "source" : "## Earthquake data"
+  }, {
+    "metadata" : {
+      "id" : "FBA295A96FEB41AA9F45EB811A7ED483"
+    },
+    "cell_type" : "markdown",
+    "source" : "**TODO** description"
+  }, {
+    "metadata" : {
+      "trusted" : true,
+      "input_collapsed" : false,
+      "collapsed" : false,
+      "id" : "2134326089C047458214F3FA4A47A8C5"
+    },
+    "cell_type" : "code",
+    "source" : "val earthquakeDF = spark.read.format(\"csv\")\n                        .option(\"header\", \"true\")  \n                        .option(\"sep\", \"\\t\") \n                        .load(\"notebooks/spark-notebooks-gallery/earthquake/data/signif.tsv\")",
+    "outputs" : [ {
+      "name" : "stdout",
+      "output_type" : "stream",
+      "text" : "earthquakeDF: org.apache.spark.sql.DataFrame = [I_D: string, FLAG_TSUNAMI: string ... 45 more fields]\n"
+    }, {
+      "metadata" : { },
+      "data" : {
+        "text/html" : ""
+      },
+      "output_type" : "execute_result",
+      "execution_count" : 3,
+      "time" : "Took: 3.239s, at 2017-06-6 10:50"
+    } ]
+  }, {
+    "metadata" : {
+      "id" : "D72E0A5257B24FF78DEBC0F2C42E8030"
+    },
+    "cell_type" : "markdown",
+    "source" : "**TODO** describe cleaning and filtering steps\n- why to choose earthquakes only after 1900? (maybe plot a distribution of number of registerd eq by decade/century) "
+  }, {
+    "metadata" : {
+      "trusted" : true,
+      "input_collapsed" : false,
+      "collapsed" : false,
+      "id" : "CE1DC6DFC9A7484B8C3A4B3A0B29CF82"
+    },
+    "cell_type" : "code",
+    "source" : "import org.apache.spark.sql.types.IntegerType\n\nval earthquakesByCentury = earthquakeDF\n                            .filter(!isnull(year($\"Year\")))\n                            .withColumn(\"Century\", (year($\"YEAR\") / 100).cast(IntegerType) + 1)\n                            .select(\"Century\")\n                            .groupBy(\"Century\")\n                            .count",
+    "outputs" : [ {
+      "name" : "stdout",
+      "output_type" : "stream",
+      "text" : "import org.apache.spark.sql.types.IntegerType\nearthquakesByCentury: org.apache.spark.sql.DataFrame = [Century: int, count: bigint]\n"
+    }, {
+      "metadata" : { },
+      "data" : {
+        "text/html" : ""
+      },
+      "output_type" : "execute_result",
+      "execution_count" : 4,
+      "time" : "Took: 1.783s, at 2017-06-6 10:50"
+    } ]
+  }, {
+    "metadata" : {
+      "trusted" : true,
+      "input_collapsed" : false,
+      "collapsed" : false,
+      "id" : "09322676159D407D80A7902D5A055AD3"
+    },
+    "cell_type" : "code",
+    "source" : "CustomPlotlyChart(earthquakesByCentury,\n                  layout=\"{title: 'Earthquakes by century', xaxis: {title: 'Century'}}\",\n                  dataOptions=\"{type: 'bar'}\",\n                  dataSources=\"{x: 'Century', y: 'count'}\")",
+    "outputs" : [ {
+      "name" : "stdout",
+      "output_type" : "stream",
+      "text" : "res5: notebook.front.widgets.charts.CustomPlotlyChart[org.apache.spark.sql.DataFrame] = <CustomPlotlyChart widget>\n"
+    }, {
+      "metadata" : { },
+      "data" : {
+        "text/html" : "<div>\n      <script data-this=\"{&quot;dataId&quot;:&quot;anon47099a02929bd7f56e25c2d3fbed5aa1&quot;,&quot;dataInit&quot;:[{&quot;Century&quot;:12,&quot;count&quot;:48},{&quot;Century&quot;:13,&quot;count&quot;:53},{&quot;Century&quot;:16,&quot;count&quot;:149},{&quot;Century&quot;:20,&quot;count&quot;:2527},{&quot;Century&quot;:19,&quot;count&quot;:1020},{&quot;Century&quot;:15,&quot;count&quot;:85},{&quot;Century&quot;:17,&quot;count&quot;:310},{&quot;Century&quot;:21,&quot;count&quot;:961},{&quot;Century&quot;:11,&quot;count&quot;:51},{&quot;Century&quot;:14,&quot;count&quot;:79},{&quot;Century&quot;:18,&quot;count&quot;:381}],&quot;genId&quot;:&quot;1219678226&quot;}\" type=\"text/x-scoped-javascript\">/*<![CDATA[*/req(['../javascripts/notebook/playground','../javascripts/notebook/magic/customPlotlyChart'], \n      function(playground, _magiccustomPlotlyChart) {\n        // data ==> data-this (in observable.js's scopedEval) ==> this in JS => { dataId, dataInit, ... }\n        // this ==> scope (in observable.js's scopedEval) ==> this.parentElement ==> div.container below (toHtml)\n\n        playground.call(data,\n                        this\n                        ,\n                        {\n    \"f\": _magiccustomPlotlyChart,\n    \"o\": {\"js\":\"var layout = {title: 'Earthquakes by century', xaxis: {title: 'Century'}}; var dataSources={x: 'Century', y: 'count'}; var dataOptions = {type: 'bar'}\",\"headers\":[\"Century\",\"count\"],\"height\":400}\n  }\n  \n                        \n                        \n                      );\n      }\n    );/*]]>*/</script>\n    <div>\n      <span class=\"chart-total-item-count\"><p data-bind=\"text: value\"><script data-this=\"{&quot;valueId&quot;:&quot;anond116c95e3c71bd87ccbc8a240c2c8076&quot;,&quot;initialValue&quot;:&quot;11&quot;}\" type=\"text/x-scoped-javascript\">/*<![CDATA[*/\nreq(\n['observable', 'knockout'],\nfunction (O, ko) {\n  ko.applyBindings({\n      value: O.makeObservable(valueId, initialValue)\n    },\n    this\n  );\n});\n        /*]]>*/</script></p> entries total</span>\n      <span class=\"chart-sampling-warning\"><p data-bind=\"text: value\"><script data-this=\"{&quot;valueId&quot;:&quot;anon4a380d32f85b16d9a6723e3a7a58f8f8&quot;,&quot;initialValue&quot;:&quot;&quot;}\" type=\"text/x-scoped-javascript\">/*<![CDATA[*/\nreq(\n['observable', 'knockout'],\nfunction (O, ko) {\n  ko.applyBindings({\n      value: O.makeObservable(valueId, initialValue)\n    },\n    this\n  );\n});\n        /*]]>*/</script></p></span>\n      <div>\n      </div>\n    </div></div>"
+      },
+      "output_type" : "execute_result",
+      "execution_count" : 5,
+      "time" : "Took: 8.853s, at 2017-06-6 10:50"
+    } ]
+  }, {
+    "metadata" : {
+      "trusted" : true,
+      "input_collapsed" : false,
+      "collapsed" : false,
+      "presentation" : {
+        "tabs_state" : "{\n  \"tab_id\": \"#tab157826895-0\"\n}",
+        "pivot_chart_state" : "{\n  \"hiddenAttributes\": [],\n  \"menuLimit\": 200,\n  \"cols\": [],\n  \"rows\": [],\n  \"vals\": [],\n  \"exclusions\": {},\n  \"inclusions\": {},\n  \"unusedAttrsVertical\": 85,\n  \"autoSortUnusedAttrs\": false,\n  \"inclusionsInfo\": {},\n  \"aggregatorName\": \"Count\",\n  \"rendererName\": \"Table\"\n}"
+      },
+      "id" : "931B2AED8B3C494C80F38A887DC72677"
+    },
+    "cell_type" : "code",
+    "source" : "val earthquakeData = earthquakeDF.na.drop(Seq(\"YEAR\", \"MONTH\", \"DAY\"))\n            .filter(year($\"YEAR\") >= 1900)\n            .withColumn(\"Date\", concat($\"YEAR\", lit(\"-\"), $\"MONTH\", lit(\"-\"), $\"DAY\"))\n            .withColumn(\"Date\", to_date($\"Date\"))",
+    "outputs" : [ {
+      "name" : "stdout",
+      "output_type" : "stream",
+      "text" : "earthquakeData: org.apache.spark.sql.DataFrame = [I_D: string, FLAG_TSUNAMI: string ... 46 more fields]\n"
+    }, {
+      "metadata" : { },
+      "data" : {
+        "text/html" : ""
+      },
+      "output_type" : "execute_result",
+      "execution_count" : 4,
+      "time" : "Took: 1.546s, at 2017-06-5 23:23"
+    } ]
+  }, {
+    "metadata" : {
+      "id" : "2FA138141D0E4D278B9A52BEFC754595"
+    },
+    "cell_type" : "markdown",
+    "source" : "## World shape data"
+  }, {
+    "metadata" : {
+      "id" : "84D497BD6A9C4D7A8425EA9D3DED9B5F"
+    },
+    "cell_type" : "markdown",
+    "source" : "**TODO** describe data format and magellan package to work with this type of data"
+  }, {
+    "metadata" : {
+      "trusted" : true,
+      "input_collapsed" : false,
+      "collapsed" : false,
+      "id" : "F90605B65940459A8E0329B80134C875"
+    },
+    "cell_type" : "code",
+    "source" : "val worldShapeDF = spark.read\n  .format(\"magellan\")\n  .load(\"notebooks/spark-notebooks-gallery/earthquake/data/TM_WORLD_BORDERS-0.3\")\n  .select(\"polygon\", \"metadata\")",
+    "outputs" : [ {
+      "name" : "stdout",
+      "output_type" : "stream",
+      "text" : "worldShapeDF: org.apache.spark.sql.DataFrame = [polygon: polygon, metadata: map<string,string>]\n"
+    }, {
+      "metadata" : { },
+      "data" : {
+        "text/html" : ""
+      },
+      "output_type" : "execute_result",
+      "execution_count" : 37,
+      "time" : "Took: 2.506s, at 2017-06-6 00:40"
+    } ]
+  }, {
+    "metadata" : {
+      "trusted" : true,
+      "input_collapsed" : false,
+      "collapsed" : false,
+      "id" : "5EF668BB29F54AFD97098F3C5E7BE340"
+    },
+    "cell_type" : "code",
+    "source" : "worldShapeDF.show(5)",
+    "outputs" : [ {
+      "name" : "stdout",
+      "output_type" : "stream",
+      "text" : "+--------------------+--------------------+\n|             polygon|            metadata|\n+--------------------+--------------------+\n|magellan.Polygon@...|Map(UN ->  68, FI...|\n|magellan.Polygon@...|Map(UN -> 704, FI...|\n|magellan.Polygon@...|Map(UN -> 784, FI...|\n|magellan.Polygon@...|Map(UN -> 586, FI...|\n|magellan.Polygon@...|Map(UN -> 608, FI...|\n+--------------------+--------------------+\nonly showing top 5 rows\n\n"
+    }, {
+      "metadata" : { },
+      "data" : {
+        "text/html" : ""
+      },
+      "output_type" : "execute_result",
+      "execution_count" : 38,
+      "time" : "Took: 2.622s, at 2017-06-6 00:40"
+    } ]
+  }, {
+    "metadata" : {
+      "id" : "1429DA9DE5C24B5A9E93754748A88CF6"
+    },
+    "cell_type" : "markdown",
+    "source" : "## Merging earthquake data with world shape data"
+  }, {
+    "metadata" : {
+      "id" : "61C74DCE82DA4A2284B5647049278CFF"
+    },
+    "cell_type" : "markdown",
+    "source" : "**(TODO)** describe the imports and merge strategy"
+  }, {
+    "metadata" : {
+      "trusted" : true,
+      "input_collapsed" : false,
+      "collapsed" : false,
+      "id" : "716B9E4A6F02435E899F686C0D8B81A3"
+    },
+    "cell_type" : "code",
+    "source" : "import org.apache.spark.sql.magellan.dsl.expressions._\nimport org.apache.spark.sql.types._",
+    "outputs" : [ {
+      "name" : "stdout",
+      "output_type" : "stream",
+      "text" : "import org.apache.spark.sql.magellan.dsl.expressions._\nimport org.apache.spark.sql.types._\n"
+    }, {
+      "metadata" : { },
+      "data" : {
+        "text/html" : ""
+      },
+      "output_type" : "execute_result",
+      "execution_count" : 6,
+      "time" : "Took: 1.131s, at 2017-06-5 23:23"
+    } ]
+  }, {
+    "metadata" : {
+      "trusted" : true,
+      "input_collapsed" : false,
+      "collapsed" : false,
+      "id" : "40394DD4374142118615BCBAF13D0023"
+    },
+    "cell_type" : "code",
+    "source" : "import org.apache.spark.sql.types.DoubleType\n\nval earthquakePoints = earthquakeData\n  .withColumn(\"LONGITUDE\", col(\"LONGITUDE\").cast(DoubleType))\n  .withColumn(\"LATITUDE\", col(\"LATITUDE\").cast(DoubleType))\n  .na.drop(Seq(\"LONGITUDE\", \"LATITUDE\"))\n  .withColumn(\"Point\", point($\"LONGITUDE\", $\"LATITUDE\"))",
+    "outputs" : [ {
+      "name" : "stdout",
+      "output_type" : "stream",
+      "text" : "import org.apache.spark.sql.types.DoubleType\nearthquakePoints: org.apache.spark.sql.DataFrame = [I_D: string, FLAG_TSUNAMI: string ... 47 more fields]\n"
+    }, {
+      "metadata" : { },
+      "data" : {
+        "text/html" : ""
+      },
+      "output_type" : "execute_result",
+      "execution_count" : 7,
+      "time" : "Took: 1.605s, at 2017-06-5 23:23"
+    } ]
+  }, {
+    "metadata" : {
+      "trusted" : true,
+      "input_collapsed" : false,
+      "collapsed" : false,
+      "id" : "215678A9ABFD4577B699B439AD6E9B9D"
+    },
+    "cell_type" : "code",
+    "source" : "worldShapeDF.select(\"metadata\").show(4, false)",
+    "outputs" : [ {
+      "name" : "stdout",
+      "output_type" : "stream",
+      "text" : "+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+\n|metadata                                                                                                                                                                                                                 |\n+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+\n|Map(UN ->  68, FIPS -> BL, ISO2 -> BO, AREA ->  108438, NAME -> Bolivia                                           , SUBREGION ->   5, REGION ->  19, POP2005 ->    9182015, LON ->  -64.671, LAT -> -16.715, ISO3 -> BOL)|\n|Map(UN -> 704, FIPS -> VM, ISO2 -> VN, AREA ->   32549, NAME -> Viet Nam                                          , SUBREGION ->  35, REGION -> 142, POP2005 ->   85028643, LON ->  105.314, LAT ->  21.491, ISO3 -> VNM)|\n|Map(UN -> 784, FIPS -> AE, ISO2 -> AE, AREA ->    8360, NAME -> United Arab Emirates                              , SUBREGION -> 145, REGION -> 142, POP2005 ->    4104291, LON ->   54.163, LAT ->  23.549, ISO3 -> ARE)|\n|Map(UN -> 586, FIPS -> PK, ISO2 -> PK, AREA ->   77088, NAME -> Pakistan                                          , SUBREGION ->  34, REGION -> 142, POP2005 ->  158080591, LON ->   69.386, LAT ->  29.967, ISO3 -> PAK)|\n+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+\nonly showing top 4 rows\n\n"
+    }, {
+      "metadata" : { },
+      "data" : {
+        "text/html" : ""
+      },
+      "output_type" : "execute_result",
+      "execution_count" : 56,
+      "time" : "Took: 4.734s, at 2017-06-6 01:02"
+    } ]
+  }, {
+    "metadata" : {
+      "trusted" : true,
+      "input_collapsed" : false,
+      "collapsed" : false,
+      "id" : "CD5DBDCB2EB44A44A001D03093344A63"
+    },
+    "cell_type" : "code",
+    "source" : "\nworldShapeDF.select($\"polygon\", explode($\"metadata\").as(Seq(\"k\", \"v\")))\n            .filter($\"k\" === \"ISO3\")\n            .drop(\"k\")\n            .withColumnRenamed(\"v\", \"ISO3\")\n            // .show(5, false)",
+    "outputs" : [ {
+      "name" : "stdout",
+      "output_type" : "stream",
+      "text" : "+-------------------------+----+\n|polygon                  |ISO3|\n+-------------------------+----+\n|magellan.Polygon@ec654e54|BOL |\n|magellan.Polygon@d81466e9|VNM |\n|magellan.Polygon@b4808c70|ARE |\n|magellan.Polygon@f9e5c1d4|PAK |\n|magellan.Polygon@79c9d461|PHL |\n+-------------------------+----+\nonly showing top 5 rows\n\n"
+    }, {
+      "metadata" : { },
+      "data" : {
+        "text/html" : ""
+      },
+      "output_type" : "execute_result",
+      "execution_count" : 58,
+      "time" : "Took: 5.297s, at 2017-06-6 01:06"
+    } ]
+  }, {
+    "metadata" : {
+      "trusted" : true,
+      "input_collapsed" : false,
+      "collapsed" : false,
+      "id" : "9617A280C9874B2EBC4E8C481873EDD6"
+    },
+    "cell_type" : "code",
+    "source" : "// spatial join\nval joinedDF = earthquakePoints\n                .join(worldShapeDF.drop(\"point\").drop(\"polyline\"))\n                .where($\"Point\" within $\"polygon\")\n                .cache()\njoinedDF.count",
+    "outputs" : [ {
+      "name" : "stdout",
+      "output_type" : "stream",
+      "text" : "joinedDF: org.apache.spark.sql.Dataset[org.apache.spark.sql.Row] = [I_D: string, FLAG_TSUNAMI: string ... 50 more fields]\nres15: Long = 2197\n"
+    }, {
+      "metadata" : { },
+      "data" : {
+        "text/html" : "2197"
+      },
+      "output_type" : "execute_result",
+      "execution_count" : 12,
+      "time" : "Took: 6.458s, at 2017-06-5 23:25"
+    } ]
+  }, {
+    "metadata" : {
+      "trusted" : true,
+      "input_collapsed" : false,
+      "collapsed" : false,
+      "id" : "2333714509F6496CB76FFB9D5AB7A299"
+    },
+    "cell_type" : "code",
+    "source" : "joinedDF.select(\"COUNTRY\").show()",
+    "outputs" : [ {
+      "name" : "stdout",
+      "output_type" : "stream",
+      "text" : "+-----------+\n|    COUNTRY|\n+-----------+\n|  INDONESIA|\n|     MEXICO|\n|     MEXICO|\n|  VENEZUELA|\n| COSTA RICA|\n|     TURKEY|\n|        USA|\n|   COLOMBIA|\n|  INDONESIA|\n|        USA|\n|      CHINA|\n|        USA|\n|PHILIPPINES|\n|     TURKEY|\n|     MEXICO|\n|  GUATEMALA|\n| AZERBAIJAN|\n|     TURKEY|\n|  GUATEMALA|\n|     TURKEY|\n+-----------+\nonly showing top 20 rows\n\n"
+    }, {
+      "metadata" : { },
+      "data" : {
+        "text/html" : ""
+      },
+      "output_type" : "execute_result",
+      "execution_count" : 17,
+      "time" : "Took: 1.787s, at 2017-06-6 00:25"
+    } ]
+  } ],
+  "nbformat" : 4
+}
