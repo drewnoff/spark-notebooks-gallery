@@ -34,7 +34,7 @@
       "id" : "ED3C05E08287425284735A5BF450EE59"
     },
     "cell_type" : "markdown",
-    "source" : "In this notebook we'll see how we can use Spark Notebook to merge and clean data from different sources\nto visualize and get insites on significant earthquake historical data.\nWe will use Spark DataFrame API, \n[Magellan](https://github.com/harsha2010/magellan) spark package for geospatial analytics\nand build in support (`CustomPlotlyChart`) for [Plotly javascript API](https://plot.ly/javascript/) to visualize the data. For more examples on usage of `CustomPlotlyChart` refer to notebooks from `notebooks/viz` dir which comes with Spark Notebook distribution."
+    "source" : "In this notebook we'll see how we can use Spark Notebook to merge and clean data from different sources\nto visualize and get insites on significant earthquake historical data.\nWe will use Spark DataFrame API, \n[Magellan](https://github.com/harsha2010/magellan) spark package for geospatial analytics\nand build in support (`CustomPlotlyChart`) for [Plotly javascript API](https://plot.ly/javascript/) to visualize the data. For more examples on usage of `CustomPlotlyChart` refer to notebooks from `notebooks/viz` dir which comes with Spark Notebook distribution. Resulting Plotly charts are interactive so fill free to zoom and hover over data directly from the Notebook."
   }, {
     "metadata" : {
       "id" : "F9567B690F474A0D8E12639BCBD6D9C6"
@@ -300,12 +300,6 @@
       "execution_count" : 17,
       "time" : "Took: 2.747s, at 2017-06-18 14:39"
     } ]
-  }, {
-    "metadata" : {
-      "id" : "FA19DBA9934344C683311BACA5C8119B"
-    },
-    "cell_type" : "markdown",
-    "source" : "Plotly charts are interactive so fill free to zoom and hover over data to see details."
   }, {
     "metadata" : {
       "id" : "2FA138141D0E4D278B9A52BEFC754595"
