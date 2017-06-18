@@ -1,0 +1,1 @@
+This notebook is highly inspired by [@jlcoto](https://github.com/jlcoto) [assignment](https://github.com/jlcoto/Udacity/tree/master/earthquake_project) for the Udacity Data Analytics Nanodegree project.
