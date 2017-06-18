@@ -4,7 +4,10 @@ In this notebook we'll see how we can use Spark Notebook to merge and clean data
 to visualize and get insites on significant earthquake historical data.
 We will use Spark DataFrame API, 
 [Magellan](https://github.com/harsha2010/magellan) spark package for geospatial analytics
-and build in support (`CustomPlotlyChart`) for [Plotly javascript API](https://plot.ly/javascript/) to visualize the data. For more examples on usage of `CustomPlotlyChart` refer to notebooks from `notebooks/viz` dir which comes with Spark Notebook distribution.
+and build in support (`CustomPlotlyChart`) for [Plotly javascript API](https://plot.ly/javascript/) to visualize the data. 
+For more examples on usage of `CustomPlotlyChart` refer to notebooks from `notebooks/viz` dir which comes with Spark Notebook distribution.
+Resulting Plotly charts are interactive so fill free to zoom and hover over data directly from the Notebook.
+Additionally I've exported the resulting charts to [plotly cloud](https://plot.ly ) and added links to this README so one could navigate from the README to fully interactive resulting charts.
 
 ## Roadmap
 
@@ -111,3 +114,134 @@ CustomPlotlyChart(totalDeathsByCountry,
 **[click here](https://plot.ly/~drewnoff/9.embed)** to see the interactive chart
 
 <img src="http://telegra.ph/file/4e01dda225650c862dfa4.png" width=800></img>
+
+### Significant earthquakes around the world
+
+We can use provided geo data to point out where every significant earthquake had taken place.
+
+```scala
+val earthquakeVizData = earthquakeData
+        .select("LATITUDE", "LONGITUDE", "LOCATION_NAME", "DEATHS", "DEATHS_DESCRIPTION", "YEAR")
+        .withColumn("text", concat($"LOCATION_NAME", 
+                                   lit(", "), $"YEAR", lit(". Deaths: "),
+                                   when(isnull($"DEATHS"), "No data").otherwise($"DEATHS")))
+        .withColumn("earthquakeSize", when(isnull($"DEATHS"), 5).otherwise( log(2, $"DEATHS") + 5) )
+        .withColumn("color", $"earthquakeSize")
+        .drop("DEATHS_DESCRIPTION")
+```
+
+```scala
+CustomPlotlyChart(
+  earthquakeVizData, 
+  layout="""{
+        title: 'Significant Earthquakes around the World since 1900',
+        height: 800,
+        geo: {
+            projection: {
+                type: 'robinson'
+            },
+            showlakes: true,
+            lakecolor: 'lightblue',
+            showland: true,
+            landcolor: 'rgb(237, 237, 237)',
+            showocean: true,
+            oceancolor: 'lightblue',
+            showcountries: true,
+            countrywidth: 0.2
+        }
+    }""",
+  dataOptions="""{
+    type: 'scattergeo',
+    locationmode: 'country names',
+    hoverinfo: 'text',
+    marker: {
+        line: {
+            width: 0
+        }}}""",
+  dataSources="{lat: 'LATITUDE', lon: 'LONGITUDE', text: 'text', marker: {size: 'earthquakeSize', color: 'color'}}",
+  maxPoints=4000)
+```
+
+**[click here](https://plot.ly/~drewnoff/3.embed)** to see the interactive chart
+
+<img src="http://telegra.ph/file/71e249ff09ea703e4e206.png" width=800></img>
+
+## Merging earthquake data with World Borders data
+
+[World Borders Dataset](http://thematicmapping.org/downloads/world_borders.php) is stored in [shapefile](https://en.wikipedia.org/wiki/Shapefile) format and contains country borders as polygons.
+
+To work with shapefiles we will use third party spark package called [Magellan](https://github.com/harsha2010/magellan).
+
+```scala
+val worldShapeDF = spark.read
+  .format("magellan")
+  .load("notebooks/spark-notebooks-gallery/gallery/earthquake/data/TM_WORLD_BORDERS-0.3")
+  .select("polygon", "metadata")
+  
+worldShapeDF.show(5)
+```
+
+```
++--------------------+--------------------+
+|             polygon|            metadata|
++--------------------+--------------------+
+|magellan.Polygon@...|Map(UN ->  68, FI...|
+|magellan.Polygon@...|Map(UN -> 704, FI...|
+|magellan.Polygon@...|Map(UN -> 784, FI...|
+|magellan.Polygon@...|Map(UN -> 586, FI...|
+|magellan.Polygon@...|Map(UN -> 608, FI...|
++--------------------+--------------------+
+only showing top 5 rows
+```
+
+Let's extract `ISO3` country codes from `metadata` column.
+
+```scala
+
+val countryShapeDF = worldShapeDF.select($"polygon", explode($"metadata").as(Seq("k", "v")))
+            .filter($"k" === "ISO3")
+            .drop("k")
+            .withColumnRenamed("v", "ISO3")
+countryShapeDF.show(5)
+```
+
+```
++--------------------+----+
+|             polygon|ISO3|
++--------------------+----+
+|magellan.Polygon@...| BOL|
+|magellan.Polygon@...| VNM|
+|magellan.Polygon@...| ARE|
+|magellan.Polygon@...| PAK|
+|magellan.Polygon@...| PHL|
++--------------------+----+
+only showing top 5 rows
+```
+
+The earthquake data has latitude and longitude coordinates for the earthquakes' location.
+To perform spatial join one should look if the latitude and longitude fall within the boundaries of a country geometry and, if so, merge it appropriately.
+In order to perform this we should convert `LONGITUDE` and `LATITUDE` pairs from the earthquake data to magellan `Point` type and use `within` predicate from `magellan` dsl.
+
+```scala
+import org.apache.spark.sql.magellan.dsl.expressions._
+import org.apache.spark.sql.types._
+
+import org.apache.spark.sql.types.DoubleType
+
+val earthquakePoints = earthquakeData
+  .withColumn("LONGITUDE", col("LONGITUDE").cast(DoubleType))
+  .withColumn("LATITUDE", col("LATITUDE").cast(DoubleType))
+  .na.drop(Seq("LONGITUDE", "LATITUDE"))
+  .withColumn("Point", point($"LONGITUDE", $"LATITUDE"))
+```
+
+```scala
+val spatialJoined = earthquakePoints
+                .join(countryShapeDF)
+                .where($"Point" within $"polygon")
+                .cache()
+spatialJoined.count
+```
+```
+res37: Long = 2197
+```
