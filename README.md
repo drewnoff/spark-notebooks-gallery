@@ -1,0 +1,1 @@
+# My gallery with various sorts of Spark notebooks
