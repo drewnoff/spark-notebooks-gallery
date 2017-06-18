@@ -245,3 +245,90 @@ spatialJoined.count
 ```
 res37: Long = 2197
 ```
+
+## Penn World Tables
+
+Now that we have `ISO3` country codes we can merge [Penn World Table](http://www.rug.nl/ggdc/productivity/pwt/)
+dataset to obtain economic information by countries.
+Our main interest here is to quickly check whether the level of GDP per capita is related to number of deaths following an earthquake.
+
+I've extracted the data in `csv` format from original `xlsx` file.
+
+```scala
+val pwtDF = spark.read
+    .format("csv")
+    .option("header", "true")
+    .option("inferSchema", "true")
+    .load("notebooks/spark-notebooks-gallery/gallery/earthquake/data/pwt90.csv")
+```
+
+The dataset doesn't contain GDP per capita values but we can obtain it by dividing county `GDP`
+by its population.
+
+```scala
+val pwtData = pwtDF.select("countrycode", "country", "year", "rgdpe", "pop")
+     .na.drop(Seq("rgdpe", "pop"))
+     .withColumn("rgdpePerCapita", $"rgdpe" / $"pop")
+     
+val joined = spatialJoined.join(pwtData,
+              year(spatialJoined("YEAR")) === pwtData("year")
+                   && spatialJoined("ISO3") === pwtData("countryCode"))
+            .drop(pwtData("year"))
+            .cache()
+```
+
+Now let's try to visualize how number of deaths following an earthquake is related to two factors:
+earthquake magnitude and country GDP per capita.
+
+```scala
+val joinedVizData = joined.withColumn("magnitude", when(!isnull($"EQ_MAG_MS"), $"EQ_MAG_MS")
+                               .when(!isnull($"EQ_MAG_MW"), $"EQ_MAG_MW")
+                               .when(!isnull($"EQ_MAG_MB"), $"EQ_MAG_MB")
+                               .when(!isnull($"EQ_MAG_ML"), $"EQ_MAG_ML")
+                               .when(!isnull($"EQ_MAG_MFA"), $"EQ_MAG_MFA")
+                               .otherwise($"EQ_MAG_UNK"))
+      .na.drop(Seq("DEATHS", "magnitude"))
+      .withColumn("text", concat($"LOCATION_NAME", 
+                                   lit(", "), $"YEAR",
+                                   lit(". Pop.: "), $"pop",
+                                   lit(". Deaths: "), $"DEATHS"))
+```
+
+```scala
+CustomPlotlyChart(
+  joinedVizData.withColumn("bubbleSize", log(2, $"DEATHS")*20), 
+  layout="""{
+        title: 'Earthquakes vs GDP per capita',
+        height: 600,
+        xaxis: {title: 'Magnitude'},
+        yaxis: {title: 'GDP per Capita', type: 'log'},
+        hovermode: 'closest'
+    }""",
+  dataOptions="""{
+    mode: 'markers',
+    marker: {
+        sizemode: 'area',
+        colorscale: 'Electric',
+        reversescale: true,
+        colorbar: {
+          title: 'Deaths',
+          thickness: 8.0,
+          tickmode: 'array',
+          tickvals: [0, 100, 300],
+          ticktext: ['0', 'less', 'more']
+        }
+    }}""",
+  dataSources="""{
+    text: 'text',
+    x: 'magnitude',
+    y: 'rgdpePerCapita',
+    marker: {size: 'bubbleSize', color: 'bubbleSize'}}""")
+```
+
+**[click here](https://plot.ly/~drewnoff/5.embed)** to see the interactive chart
+
+<img src="http://telegra.ph/file/16173989d23e596b3e75e.png" width=800></img>
+
+Easy to notice the strong relation between number of deaths and an earthquake magnitude
+which shouldn't be a surprse. But also one can observe slightly negative relation between number of deaths and per capita gdp.
+These findings can be further explored in bivariate and multivariate analysis along many other possible cases which are out of the scope of this notebook.
