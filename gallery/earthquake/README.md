@@ -62,7 +62,52 @@ CustomPlotlyChart(earthquakesByCentury,
                   dataSources="{x: 'Century', y: 'count'}")
 ```
 
-**[click here](https://plot.ly/~drewnoff/7.embed)** to see interactive chart
+**[click here](https://plot.ly/~drewnoff/7.embed)** to see the interactive chart
 
 <img src="http://telegra.ph/file/e8c13366fa4826d12a808.png" width=800>
 </img>
+
+We are going to observe only earthquakes that happened from 1900 onwards. Also, we want our earthquake to have complete registries in terms of year, days and months in which they occurred.
+
+```scala
+val earthquakeData = earthquakeDF.na.drop(Seq("YEAR", "MONTH", "DAY"))
+            .filter(($"YEAR").cast(IntegerType) >= 1900)
+            .withColumn("Date", concat($"YEAR", lit("-"), $"MONTH", lit("-"), $"DAY"))
+            .withColumn("Date", to_date($"Date"))
+            .withColumn("DEATHS", trim($"DEATHS").cast(IntegerType))
+```
+
+It's interesting to look at the total number of deaths caused by earthquakes in observed period of time per country.
+
+```scala
+val totalDeathsByCountry = earthquakeData.filter(!isnull($"DEATHS"))
+              .groupBy("Country")
+              .agg(sum($"DEATHS").alias("TOTAL_DEATHS"))
+              .orderBy(-$"TOTAL_DEATHS")
+
+totalDeathsByCountry.show(5)
+```
+
+```
++--------+------------+
+| Country|TOTAL_DEATHS|
++--------+------------+
+|   CHINA|      650543|
+|   HAITI|      316006|
+|    IRAN|      189652|
+|   JAPAN|      165728|
+|PAKISTAN|      146864|
++--------+------------+
+only showing top 5 rows
+```
+
+```scala
+CustomPlotlyChart(totalDeathsByCountry,
+                  layout="{title: 'Total deaths by country since 1900', xaxis: {title: 'Country'}}",
+                  dataOptions="{type: 'bar'}",
+                  dataSources="{x: 'Country', y: 'TOTAL_DEATHS'}")
+```
+
+**[click here](https://plot.ly/~drewnoff/9.embed)** to see the interactive chart
+
+<img src="http://telegra.ph/file/4e01dda225650c862dfa4.png" width=800></img>
