@@ -1,7 +1,7 @@
 This notebook is highly inspired by [@jlcoto](https://github.com/jlcoto) [assignment](https://github.com/jlcoto/Udacity/tree/master/earthquake_project) for the Udacity Data Analytics Nanodegree project.
 
 In this notebook we'll see how we can use Spark Notebook to merge and clean data from different sources
-to visualize and get insites on significant earthquake historical data.
+to visualize and get insights on significant earthquake historical data.
 We will use Spark DataFrame API, 
 [Magellan](https://github.com/harsha2010/magellan) spark package for geospatial analytics
 and build in support (`CustomPlotlyChart`) for [Plotly javascript API](https://plot.ly/javascript/) to visualize the data. 
