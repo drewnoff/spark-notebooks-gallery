@@ -108,7 +108,7 @@
       "id" : "6AE15A64CF6D41FB8777CDBEA6483C79"
     },
     "cell_type" : "code",
-    "source" : "val btcPricesDF = spark.read\n  .format(\"csv\")\n  .schema(btcPriceSchema)\n  .load(\"/home/dr0ff/hackspace/opensource/spark-notebooks-gallery/gallery/cryptocurrency-ts/crypto_data/btc_prices.csv\")\n  .withColumn(\"time\", unix_timestamp($\"datetime\", \"yyyy-MM-dd HH:mm:ssX\"))\n  .withColumn(\"date\", from_unixtime($\"time\", \"yyyy-MM-dd\"))\n\nval cryptoPricesDF = spark.read\n  .format(\"csv\")\n  .schema(cryptoPriceSchema)\n  .load(\"/home/dr0ff/hackspace/opensource/spark-notebooks-gallery/gallery/cryptocurrency-ts/crypto_data/crypto_prices.csv\")\n  .withColumn(\"time\", unix_timestamp($\"datetime\", \"MM/dd/yyyy HH:mm\"))\n  .withColumn(\"date\", from_unixtime($\"time\", \"yyyy-MM-dd\"))",
+    "source" : "val btcPricesDF = spark.read\n  .format(\"csv\")\n  .schema(btcPriceSchema)\n  .load(\"/path/to/crypto_data/btc_prices.csv\")\n  .withColumn(\"time\", unix_timestamp($\"datetime\", \"yyyy-MM-dd HH:mm:ssX\"))\n  .withColumn(\"date\", from_unixtime($\"time\", \"yyyy-MM-dd\"))\n\nval cryptoPricesDF = spark.read\n  .format(\"csv\")\n  .schema(cryptoPriceSchema)\n  .load(\"/path/to/crypto_data/crypto_prices.csv\")\n  .withColumn(\"time\", unix_timestamp($\"datetime\", \"MM/dd/yyyy HH:mm\"))\n  .withColumn(\"date\", from_unixtime($\"time\", \"yyyy-MM-dd\"))",
     "outputs" : [ ]
   }, {
     "metadata" : {
