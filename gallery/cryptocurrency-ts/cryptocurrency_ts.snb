@@ -1,6 +1,5 @@
 {
   "metadata" : {
-    "id" : "7821c9b8-0aa5-4593-9420-223bba091d38",
     "name" : "cryptocurrency_ts",
     "user_save_timestamp" : "1970-01-01T03:00:00.000Z",
     "auto_save_timestamp" : "1970-01-01T03:00:00.000Z",
@@ -10,14 +9,12 @@
       "codemirror_mode" : "text/x-scala"
     },
     "trusted" : true,
-    "sparkNotebook" : null,
     "customLocalRepo" : null,
     "customRepos" : null,
     "customDeps" : [ "com.twosigma % flint_2.11 % 0.2.0-SNAPSHOT" ],
     "customImports" : null,
     "customArgs" : null,
-    "customSparkConf" : null,
-    "customVars" : null
+    "customSparkConf" : null
   },
   "cells" : [ {
     "metadata" : {
@@ -81,7 +78,7 @@
     "metadata" : {
       "trusted" : true,
       "input_collapsed" : false,
-      "collapsed" : false,
+      "collapsed" : true,
       "id" : "C56940B83424472E8351CF99DC00A87C"
     },
     "cell_type" : "code",
@@ -97,7 +94,7 @@
     "metadata" : {
       "trusted" : true,
       "input_collapsed" : false,
-      "collapsed" : false,
+      "collapsed" : true,
       "id" : "728B6EC9ABE84A2980BD3F02FD231405"
     },
     "cell_type" : "code",
@@ -107,7 +104,7 @@
     "metadata" : {
       "trusted" : true,
       "input_collapsed" : false,
-      "collapsed" : false,
+      "collapsed" : true,
       "id" : "6AE15A64CF6D41FB8777CDBEA6483C79"
     },
     "cell_type" : "code",
@@ -117,7 +114,7 @@
     "metadata" : {
       "trusted" : true,
       "input_collapsed" : false,
-      "collapsed" : false,
+      "collapsed" : true,
       "id" : "BD15BCA0C36A43EFBB6D5AA3B2F0D6E0"
     },
     "cell_type" : "code",
@@ -127,7 +124,7 @@
     "metadata" : {
       "trusted" : true,
       "input_collapsed" : false,
-      "collapsed" : false,
+      "collapsed" : true,
       "id" : "9D9039DA7D57498C9E5EB15958EA5E45"
     },
     "cell_type" : "code",
@@ -137,7 +134,7 @@
     "metadata" : {
       "trusted" : true,
       "input_collapsed" : false,
-      "collapsed" : false,
+      "collapsed" : true,
       "id" : "63C55BF359444F208E01C54907EFA654"
     },
     "cell_type" : "code",
@@ -165,7 +162,7 @@
     "metadata" : {
       "trusted" : true,
       "input_collapsed" : false,
-      "collapsed" : false,
+      "collapsed" : true,
       "id" : "ED6B95585618448A8B97335689306F77"
     },
     "cell_type" : "code",
@@ -187,7 +184,7 @@
     "metadata" : {
       "trusted" : true,
       "input_collapsed" : false,
-      "collapsed" : false,
+      "collapsed" : true,
       "id" : "4A1B9DF1367E42758755ED783747B711"
     },
     "cell_type" : "code",
@@ -197,7 +194,7 @@
     "metadata" : {
       "trusted" : true,
       "input_collapsed" : false,
-      "collapsed" : false,
+      "collapsed" : true,
       "id" : "23801219EBF3454D87E591F3BE45AA29"
     },
     "cell_type" : "code",
@@ -228,7 +225,7 @@
     "metadata" : {
       "trusted" : true,
       "input_collapsed" : false,
-      "collapsed" : false,
+      "collapsed" : true,
       "id" : "590F510E372D48FB96F0A5E082D43CA0"
     },
     "cell_type" : "code",
@@ -238,7 +235,7 @@
     "metadata" : {
       "trusted" : true,
       "input_collapsed" : false,
-      "collapsed" : false,
+      "collapsed" : true,
       "id" : "C63F83115F424A13A3BD057C0DB61922"
     },
     "cell_type" : "code",
@@ -248,7 +245,7 @@
     "metadata" : {
       "trusted" : true,
       "input_collapsed" : false,
-      "collapsed" : false,
+      "collapsed" : true,
       "id" : "53D487E7769543CEA8D3388493F51EC8"
     },
     "cell_type" : "code",
@@ -258,7 +255,7 @@
     "metadata" : {
       "trusted" : true,
       "input_collapsed" : false,
-      "collapsed" : false,
+      "collapsed" : true,
       "id" : "822A53590B61494E8B1BD9640F425675"
     },
     "cell_type" : "code",
@@ -274,7 +271,7 @@
     "metadata" : {
       "trusted" : true,
       "input_collapsed" : false,
-      "collapsed" : false,
+      "collapsed" : true,
       "id" : "5AF9954AF0404E918EB95407C8A35759"
     },
     "cell_type" : "code",
@@ -290,7 +287,7 @@
     "metadata" : {
       "trusted" : true,
       "input_collapsed" : false,
-      "collapsed" : false,
+      "collapsed" : true,
       "id" : "AAF76AF4F301443BAD6781BF4C553DD9"
     },
     "cell_type" : "code",
@@ -318,7 +315,7 @@
     "metadata" : {
       "trusted" : true,
       "input_collapsed" : false,
-      "collapsed" : false,
+      "collapsed" : true,
       "id" : "F1A428EA255A4959BE38761CF4C6489C"
     },
     "cell_type" : "code",
@@ -328,7 +325,7 @@
     "metadata" : {
       "trusted" : true,
       "input_collapsed" : false,
-      "collapsed" : false,
+      "collapsed" : true,
       "id" : "9E116C20DB47467A87D8A860539B6D97"
     },
     "cell_type" : "code",
@@ -338,7 +335,7 @@
     "metadata" : {
       "trusted" : true,
       "input_collapsed" : false,
-      "collapsed" : false,
+      "collapsed" : true,
       "id" : "C4D424E20D7A473086136871C4814E75"
     },
     "cell_type" : "code",
@@ -360,7 +357,7 @@
     "metadata" : {
       "trusted" : true,
       "input_collapsed" : false,
-      "collapsed" : false,
+      "collapsed" : true,
       "id" : "8C60586CB5484BEA8B9D91467E38FE3C"
     },
     "cell_type" : "code",
@@ -370,7 +367,7 @@
     "metadata" : {
       "trusted" : true,
       "input_collapsed" : false,
-      "collapsed" : false,
+      "collapsed" : true,
       "id" : "61BDD2D698E141588CE9DD434EA51493"
     },
     "cell_type" : "code",
@@ -380,7 +377,7 @@
     "metadata" : {
       "trusted" : true,
       "input_collapsed" : false,
-      "collapsed" : false,
+      "collapsed" : true,
       "id" : "9F9F7B1FE7D841F6942A486DD6E33EC6"
     },
     "cell_type" : "code",
@@ -390,7 +387,7 @@
     "metadata" : {
       "trusted" : true,
       "input_collapsed" : false,
-      "collapsed" : false,
+      "collapsed" : true,
       "id" : "80DD564E680C48598881E7820FD1122E"
     },
     "cell_type" : "code",
@@ -406,7 +403,7 @@
     "metadata" : {
       "trusted" : true,
       "input_collapsed" : false,
-      "collapsed" : false,
+      "collapsed" : true,
       "id" : "5BD56C0BE94F4B46A5564CE3C1A1CC00"
     },
     "cell_type" : "code",
@@ -428,7 +425,7 @@
     "metadata" : {
       "trusted" : true,
       "input_collapsed" : false,
-      "collapsed" : false,
+      "collapsed" : true,
       "id" : "A721A4B660DA4383B0D7C896CB2A6026"
     },
     "cell_type" : "code",
@@ -438,7 +435,7 @@
     "metadata" : {
       "trusted" : true,
       "input_collapsed" : false,
-      "collapsed" : false,
+      "collapsed" : true,
       "id" : "5F486FA7FD334FF892B75B6C72CE75B0"
     },
     "cell_type" : "code",
@@ -454,7 +451,7 @@
     "metadata" : {
       "trusted" : true,
       "input_collapsed" : false,
-      "collapsed" : false,
+      "collapsed" : true,
       "id" : "3568A800DF8847C49D44265D3E479847"
     },
     "cell_type" : "code",
@@ -470,7 +467,7 @@
     "metadata" : {
       "trusted" : true,
       "input_collapsed" : false,
-      "collapsed" : false,
+      "collapsed" : true,
       "id" : "C0E84F1D3E494E5D865D06C27A83C428"
     },
     "cell_type" : "code",
@@ -486,7 +483,7 @@
     "metadata" : {
       "trusted" : true,
       "input_collapsed" : false,
-      "collapsed" : false,
+      "collapsed" : true,
       "id" : "8BFE4332896F4BE7A9D9A50B25543142"
     },
     "cell_type" : "code",
@@ -511,7 +508,7 @@
     "metadata" : {
       "trusted" : true,
       "input_collapsed" : false,
-      "collapsed" : false,
+      "collapsed" : true,
       "id" : "A4C5E79D7931421482E2982C35CA33D2"
     },
     "cell_type" : "code",
@@ -521,7 +518,7 @@
     "metadata" : {
       "trusted" : true,
       "input_collapsed" : false,
-      "collapsed" : false,
+      "collapsed" : true,
       "id" : "CB89C0134A304F538EB0E4A66B368DA8"
     },
     "cell_type" : "code",
@@ -537,7 +534,7 @@
     "metadata" : {
       "trusted" : true,
       "input_collapsed" : false,
-      "collapsed" : false,
+      "collapsed" : true,
       "id" : "01CAC262C53A41869F29E23C2A5C7556"
     },
     "cell_type" : "code",
@@ -547,7 +544,7 @@
     "metadata" : {
       "trusted" : true,
       "input_collapsed" : false,
-      "collapsed" : false,
+      "collapsed" : true,
       "id" : "171E9B975D2640598DB6DA75A25C9695"
     },
     "cell_type" : "code",
@@ -563,7 +560,7 @@
     "metadata" : {
       "trusted" : true,
       "input_collapsed" : false,
-      "collapsed" : false,
+      "collapsed" : true,
       "id" : "A2BAD0F7159C4DCC8D23FDAC81996E51"
     },
     "cell_type" : "code",
@@ -573,7 +570,7 @@
     "metadata" : {
       "trusted" : true,
       "input_collapsed" : false,
-      "collapsed" : false,
+      "collapsed" : true,
       "id" : "63B99551E4164D0884063A02FB84BC44"
     },
     "cell_type" : "code",
@@ -583,7 +580,7 @@
     "metadata" : {
       "trusted" : true,
       "input_collapsed" : false,
-      "collapsed" : false,
+      "collapsed" : true,
       "id" : "A6BE93EE6A2B41C29DE62F09CD01146B"
     },
     "cell_type" : "code",
@@ -593,7 +590,7 @@
     "metadata" : {
       "trusted" : true,
       "input_collapsed" : false,
-      "collapsed" : false,
+      "collapsed" : true,
       "id" : "3388FB93A43E42508838CCCFE45F5024"
     },
     "cell_type" : "code",
@@ -609,7 +606,7 @@
     "metadata" : {
       "trusted" : true,
       "input_collapsed" : false,
-      "collapsed" : false,
+      "collapsed" : true,
       "id" : "50A1EC4DED6645699F54A0AC9B94D638"
     },
     "cell_type" : "code",
@@ -619,7 +616,7 @@
     "metadata" : {
       "trusted" : true,
       "input_collapsed" : false,
-      "collapsed" : false,
+      "collapsed" : true,
       "id" : "4DD39F5AA23747D884139448BC2E4ACC"
     },
     "cell_type" : "code",
@@ -629,7 +626,7 @@
     "metadata" : {
       "trusted" : true,
       "input_collapsed" : false,
-      "collapsed" : false,
+      "collapsed" : true,
       "id" : "270CAD7D1D644D7180D7313F9413685B"
     },
     "cell_type" : "code",
@@ -639,7 +636,7 @@
     "metadata" : {
       "trusted" : true,
       "input_collapsed" : false,
-      "collapsed" : false,
+      "collapsed" : true,
       "id" : "2AFDC7CC4F3845A8BB6DD1A6794A03BE"
     },
     "cell_type" : "code",
