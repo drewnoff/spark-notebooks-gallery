@@ -1,9 +1,9 @@
 # Analyzing time series cryptocurrencies data
 
 This notebook is highly inspired by [@sarahpan](https://blog.timescale.com/@sarahpan) great [article](https://blog.timescale.com/analyzing-ethereum-bitcoin-and-1200-cryptocurrencies-using-postgresql-3958b3662e51) on analysis of cryptocurrencies data using PostgreSQL.
-The main goal of this notebook is not to provide you with Ethereum, Bitcoin and other cryptocurrencies insights (for this one please refer to @sarahpan's article) but to get you familar with tools which Apache Spark ecosystem can provide you to perform similar kind of analysis.
+The main goal of this notebook is not to provide you with Ethereum, Bitcoin and other cryptocurrencies insights (for this one please refer to @sarahpan's article) but to get you familiar with tools which Apache Spark ecosystem can provide you to perform similar kind of analysis.
 
-In this notebook we will perform time series data analysis using **Apache Spark**, a time series library for Apache Spark called **[Flint](https://github.com/twosigma/flint)** and interactive computaions and visualization capabilities of **Spark Notebook**.
+In this notebook we will perform time series data analysis using **Apache Spark**, a time series library for Apache Spark called **[Flint](https://github.com/twosigma/flint)** and interactive computations and visualization capabilities of **Spark Notebook**.
 
 ## Data
 
@@ -22,7 +22,7 @@ This is a small dataset and Spark lanched on laptop in local mode should be enou
 
 `spark 2.0` or higher, `2.11.7 or higher`. 
 We also need to provide custom dependencies on [Flint](https://github.com/twosigma/flint) library. 
-It's not published on maven central repository but you can simpliy build it from the source and publish locally by running
+It's not published on maven central repository but you can simply build it from the source and publish locally by running
 ```
 sbt publishLocal
 ```
@@ -85,6 +85,8 @@ val cryptoPricesDF = spark.read
   .load("/path/to/crypto_data/crypto_prices.csv")
   .withColumn("time", unix_timestamp($"datetime", "MM/dd/yyyy HH:mm"))
   .withColumn("date", from_unixtime($"time", "yyyy-MM-dd"))
+  
+val btcUSDPricesDF = btcPricesDF.where($"currency_code" === "USD")
 ```
 
 ```scala
@@ -105,7 +107,7 @@ only showing top 5 rows
 ```
 
 ```scala
-val btcUSDPricesDF = btcPricesDF.where($"currency_code" === "USD")
+cryptoPricesDF.show(5)
 ```
 
 ```
@@ -294,7 +296,7 @@ CustomPlotlyChart(btcVolumeByCurrencyDF,
 <img src="http://telegra.ph/file/7004e68ee5af168393b15.png" width=800>
 </img>
 
-and to make closer look at `CNY` currency
+and to take a closer look at `CNY` currency
 
 ```scala
 CustomPlotlyChart(btcPricesDF.where($"currency_code" === "CNY").where(year($"date") > 2015),
@@ -317,7 +319,7 @@ CustomPlotlyChart(btcPricesDF.where($"currency_code" === "CNY").where(year($"dat
 ## Temporal Join
 
 Now we want to obtain ETH prices in fiat currencies.
-But in `crypto_prices` table we have only btc prices for all other crypto currencies while prices in fiat currencies we have only for BTC in `btc_prices` table.
+But in `crypto_prices` table we have only BTC prices for all other crypto currencies while prices in fiat currencies we have only for BTC in `btc_prices` table.
 
 ```scala
 val ethBTCPricesTsRdd = TimeSeriesRDD
@@ -342,8 +344,8 @@ only showing top 5 rows
 And this is where `JOIN` comes in handy.
 But in case of time series data it would be a [Temporal Join](https://github.com/twosigma/flint#temporal-join-functions). And again Flint provide several options for that.
 
-Temproal join functions define a matching criteria over time.
-It could be an exact match or it can look past or look future to find closest row from other table with timesatmp located within some `tolerance` inteval.
+Temporal join functions define a matching criteria over time.
+It could be an exact match or it can look past or look future to find closest row from other table with timesatmp located within some `tolerance` interval.
 
 
 So given BTC prices in fiat currencies for some timestamp in `btc_prices` table we want to find closest ETH prices in BTC within `1 day` from `crypto_prices` table.
@@ -424,7 +426,7 @@ val cryptoBTCPricesTsRdd = TimeSeriesRDD
 val btcUSDPricesTsRdd = TimeSeriesRDD.fromDF(dataFrame = btcUSDPricesDF)(isSorted = false, timeUnit = SECONDS)
 ```
 
-An imprortant thing to note here is that when performing a join temproal join function tries to find one closest row from right table.
+An important thing to note here is that when performing a join temporal join function tries to find one closest row from right table.
 But in our case several rows from `crypto_prices` table corresponding to different currencies share the same timestamp 
 and we want to join BTC prices for all of them.
 The solution is to group all rows sharing exactly the same timestamp in `crypto_prices` table using `.groupByCycle` function.
@@ -450,7 +452,7 @@ only showing top 5 rows
 ```
 
 After this we can use `explode` function to create a new row for each element in `rows` array which contains all the rows from `crypto_prices` table
-sharing extacly the same timestamp.
+sharing exactly the same timestamp.
 
 ```scala
 val cryptoBTCPricesDF = cryptoPricesTsRddGrouped.toDF
@@ -496,7 +498,7 @@ only showing top 5 rows
 cryptoBTCPricesDF.createOrReplaceTempView("crypto_btc_usd_prices")
 ```
 
-Now we can perform required aggregation on both `crypto_btc_usd_prices` and `btc_usd_prices` tables and `UNION` the results.
+Now we can perform required aggregation on both `crypto_btc_usd_prices` and `btc_usd_prices` tables and unite the results.
 
 ```scala
 val weekSeconds = Duration(7, DAYS).toSeconds.toInt
@@ -563,6 +565,6 @@ CustomPlotlyChart(cryptoUSDWeekTransactionVolumeDF.limit(10),
 ## Conclusion
 
 I hope this notebook has given you some ideas on how can you use these great tools like Apache Spark, Flint library, 
-Spark Notebook and Plotly scientific graphing library for time serires data analysis. ALso given that Apache Spark is a fast and general engine for big data processing you can use all these tools on much larger datasets in cluster computing environment.
+Spark Notebook and Plotly scientific graphing library for time series data analysis. Also given that Apache Spark is a fast and general engine for big data processing you can use all these tools on much larger datasets in cluster computing environment.
 
 *And again many thanks to [@sarahpan](https://blog.timescale.com/@sarahpan) for [sharing](https://blog.timescale.com/analyzing-ethereum-bitcoin-and-1200-cryptocurrencies-using-postgresql-3958b3662e51) her ideas on analysis of given dataset*.
