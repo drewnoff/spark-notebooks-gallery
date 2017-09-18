@@ -1,4 +1,4 @@
-#Analyzing physical activity monitor data. Part I. Transition matrix
+# Analyzing physical activity monitor data. Part I. Transition matrix
 
 The inspiration and ideas for this lab were taken
 from [Timofey Pyrkov's talk](https://www.youtube.com/watch?v=9DoBLwvvZDA) on Yandex Data Science conference.
@@ -364,14 +364,14 @@ def plotTrMatrix(trMatrix: Array[Array[Double]]) = {
 plotTrMatrix(sampleTrMatrices(0))
 ```
 
-<img src="http://telegra.ph/file/93523014244b5f8b33750.png" width=900>
+<img src="http://telegra.ph/file/93523014244b5f8b33750.png" width=600>
 </img>
 
 ```Scala
 plotTrMatrix(sampleTrMatrices(4))
 ```
 
-<img src="http://telegra.ph/file/432297f2f90c25d253a8f.png" width=900>
+<img src="http://telegra.ph/file/432297f2f90c25d253a8f.png" width=600>
 </img>
 
 
@@ -379,5 +379,150 @@ plotTrMatrix(sampleTrMatrices(4))
 plotTrMatrix(sampleTrMatrices(5))
 ```
 
-<img src="http://telegra.ph/file/94997619943ce60b575fc.png" width=900>
+<img src="http://telegra.ph/file/94997619943ce60b575fc.png" width=600>
 </img>
+
+A transitoin matrix looks like a locomotor fingerprint and we already can say something about a person's activity patterns
+from looking into her locomotor transition matrix.
+
+## Aging
+
+We collected and cleaned a lot of data recorded by physical activity monitors and extracted quite interesting feature from raw data.
+
+Interesting to see how does physiological changes encoded in transition matrix relates to the aging process.
+
+For that we'll use Principal component analysis ([PCA](https://spark.apache.org/docs/latest/ml-features.html#pca)).
+We'll project high dimentional feature space which is in our case is 10x10=100
+(the number of elements in the matrix) of possibly correlated variables
+into lower dimentional space of linearly uncorrelated variables called principal components.
+
+We'll use [PCA](https://spark.apache.org/docs/latest/ml-features.html#pca) feature transformaer from Spark ML library. 
+
+```Scala
+import org.apache.spark.ml.linalg.{Vector, Vectors}
+import org.apache.spark.ml.feature.PCA
+
+def logScaleFeaturesUDF = udf{ (vec: Vector) => Vectors.dense(vec.toArray.map(v => -scala.math.log(1e-7 + v)))}
+
+val flattenTrMatrixDF = computedTrMatrixDS.where($"totalInten" < 1e7 && $"totalInten" > 1e5).rdd
+  .map(l => (l.seqn, Vectors.dense(l.W.flatten)))
+  .toDF("SEQN", "features")
+  .withColumn("logFeatures", logScaleFeaturesUDF($"features"))
+  .join(DemoDF, "SEQN")
+  .where($"RIDAGEYR" >= 35)
+```
+
+Here we flatten the matrix into single feature `Vector` and apply log transformation to the feature vector. 
+Also we join age data from demographics dataset. 
+And let's consider only respondents older than 35 years (since we're interested in the aging process).
+
+```Scala
+val pca = new PCA()
+  .setInputCol("logFeatures")
+  .setOutputCol("pcaFeatures")
+  .setK(3)
+  .fit(flattenTrMatrixDF)
+
+val withLocomotorPCA = pca.transform(flattenTrMatrixDF).select("SEQN", "pcaFeatures", "RIDAGEYR")
+
+withLocomotorPCA.limit(3).show(false)
+```
+
+Let's extract each principal component as an individual feature 
+and compute mean value and standart deviation of each principal component for given age.
+
+```Scala
+def getItemUDF = udf{ (vec: Vector, idx: Int) => vec(idx)}
+
+val locomotorPCvsAge = withLocomotorPCA
+  .select($"SEQN", $"RIDAGEYR".as("age"),
+          getItemUDF($"pcaFeatures", lit(0)).as("PC1"),
+          getItemUDF($"pcaFeatures", lit(1)).as("PC2"),
+          getItemUDF($"pcaFeatures", lit(2)).as("PC3"))
+
+val matrixPCvsAge = locomotorPCvsAge.groupBy($"age").agg(
+  mean($"PC1").as("meanPC1"), stddev($"PC1").as("stdPC1"),
+  mean($"PC2").as("meanPC2"), stddev($"PC2").as("stdPC2"),
+  mean($"PC3").as("meanPC3"), stddev($"PC3").as("stdPC3")
+)
+
+def plotPrincipalComponentVsAge(componentNum: Int) = {
+  CustomPlotlyChart(matrixPCvsAge.orderBy($"age"),
+                  layout=s"""{title: 'PC$componentNum vs Age', 
+                           xaxis: {title: 'Chronological age'},
+                           yaxis: {title: 'PC$componentNum'},
+                           showlegend: false}""",
+                  dataOptions="""{
+                    type: 'scatter',
+                    line: {width: 2},
+                    error_y: {type: 'data', visible: true, thickness: 0.5, width: 0}
+                  }""",
+                  dataSources=s"""{
+                    x: 'age',
+                    y: 'meanPC$componentNum',
+                    error_y: {array: 'stdPC$componentNum'}
+                  }""")
+}
+```
+
+```Scala
+plotPrincipalComponentVsAge(1)
+```
+<img src="http://telegra.ph/file/2169fc38fc5bee10e4d27.png" width=900>
+</img>
+
+```Scala
+plotPrincipalComponentVsAge(2)
+```
+
+<img src="http://telegra.ph/file/3efe14c4a27f7ee2cf459.png" width=900>
+</img>
+
+```Scala
+plotPrincipalComponentVsAge(3)
+```
+
+<img src="http://telegra.ph/file/48207747f0e639f5d8173.png" width=900>
+</img>
+
+
+PCA analysis finds the largest variance associated with age.
+That means that `PC1` of locomotor transition matrix contains information about biological age.
+
+```Scala
+CustomPlotlyChart(
+  locomotorPCvsAge, 
+  layout="""{
+        title: 'PCA of the Locomotor Transition Matrix',
+        height: 900,
+        xaxis: {title: 'PC1'},
+        yaxis: {title: 'PC2'},
+        hovermode: 'closest'
+    }""",
+  dataOptions="""{
+    mode: 'markers',
+    type: 'scatter',
+    marker: {
+        sizemode: 'area',
+        size: 12,
+        opacity: 0.75,
+        colorscale: 'Jet',
+        reversescale: true,
+        colorbar: {
+          title: 'Age',
+          thickness: 8.0
+        }
+    }}""",
+  dataSources="""{
+    x: 'PC1',
+    y: 'PC2',
+    marker: {color: 'age'}}""",
+  maxPoints=6000)
+```
+
+<img src="http://telegra.ph/file/ea603c53a27d9829cd36b.png" width=900>
+</img>
+
+We've obtained pretty strong feature and there are plenty of things we can do with this. For example, we can use it for mortality risks prediction based on locomotor activity.
+
+Let's try to conduct this analysis in the next part of this lab.
